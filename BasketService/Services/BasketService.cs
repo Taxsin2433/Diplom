@@ -44,10 +44,9 @@ namespace BasketService.Services
 
             _basketRepository.UpdateBasket(basket);
 
-            // Кеширование в Redis
+            
             _redisCacheService.Set($"Basket:{userId}", basket);
 
-            // TODO: Дополнительная логика кеширования в Redis
         }
 
         public void RemoveItemFromBasket(int userId, int productId)
@@ -64,33 +63,32 @@ namespace BasketService.Services
                 basket.BasketItems.Remove(basketItem);
                 _basketRepository.UpdateBasket(basket);
 
-                // Кеширование в Redis после удаления элемента из корзины
+   
                 _redisCacheService.Set($"Basket:{userId}", basket);
             }
 
-            // TODO: Дополнительная логика кеширования в Redis
         }
 
         public BasketResponse GetBasket(int userId)
         {
-            // Попытка получить корзину из кеша Redis
+      
             var cachedBasket = _redisCacheService.Get<Basket>($"Basket:{userId}");
             if (cachedBasket != null)
             {
-                // Вернуть содержимое корзины из кеша
+    
                 return MapToBasketResponse(cachedBasket);
             }
 
-            // Если корзина не найдена в кеше, получить из репозитория
+       
             var basket = _basketRepository.GetBasketByUserId(userId);
 
             if (basket == null)
                 return new BasketResponse();
 
-            // Кеширование в Redis
+         
             _redisCacheService.Set($"Basket:{userId}", basket);
 
-            // TODO: Дополнительная логика кеширования в Redis
+          
 
             return MapToBasketResponse(basket);
         }
@@ -103,10 +101,10 @@ namespace BasketService.Services
             {
                 _basketRepository.DeleteBasket(basket.Id);
 
-                // Удаление корзины из кеша Redis
+        
                 _redisCacheService.Remove($"Basket:{userId}");
 
-                // TODO: Дополнительная логика кеширования в Redis
+            
             }
         }
 

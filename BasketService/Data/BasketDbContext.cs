@@ -20,7 +20,7 @@ namespace BasketService.Data
                 .HasMany(b => b.BasketItems)
                 .WithOne(i => i.Basket)
                 .HasForeignKey(i => i.BasketId)
-                .OnDelete(DeleteBehavior.Cascade); // Удалять связанные элементы корзины при удалении корзины
+                .OnDelete(DeleteBehavior.Cascade); 
 
             base.OnModelCreating(modelBuilder);
         }

@@ -14,10 +14,9 @@ namespace CatalogService.Services
 
         public IEnumerable<CatalogItemModel> GetAllCatalogItems()
         {
-            // Метод для получения всех элементов каталога
+
             var catalogItems = _catalogRepository.GetAllCatalogItems();
 
-            // Преобразование сущностей в модели для возвращения
             var catalogItemModels = new List<CatalogItemModel>();
             foreach (var catalogItem in catalogItems)
             {
@@ -26,7 +25,7 @@ namespace CatalogService.Services
                     Id = catalogItem.Id,
                     Name = catalogItem.Name,
                     Price = catalogItem.Price
-                    // Добавьте другие поля, если необходимо
+          
                 });
             }
 
@@ -35,10 +34,9 @@ namespace CatalogService.Services
 
         public CatalogItemDetailModel GetCatalogItemById(int id)
         {
-            // Метод для получения элемента каталога по идентификатору
+
             var catalogItem = _catalogRepository.GetCatalogItemById(id);
 
-            // Преобразование сущности в модель для возвращения
             var catalogItemDetailModel = new CatalogItemDetailModel
             {
                 Id = catalogItem.Id,
@@ -46,7 +44,6 @@ namespace CatalogService.Services
                 Description = catalogItem.Description,
                 Price = catalogItem.Price,
                 Category = catalogItem.Category
-                // Добавьте другие поля, если необходимо
             };
 
             return catalogItemDetailModel;

@@ -6,7 +6,7 @@
         public int UserId { get; set; }
         public DateTime DateCreated { get; set; }
 
-        // Навигационное свойство для связи с элементами корзины
+
         public List<BasketItem> BasketItems { get; set; }
     }
 }
