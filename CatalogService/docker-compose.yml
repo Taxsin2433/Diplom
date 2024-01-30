@@ -11,7 +11,15 @@ services:
       - "1433:1433"
     networks:
       - catalog-network
+  redis:
+    image: "redis:latest"
+    container_name: "my-redis-container"
+    ports:
+      - "6379:6379"
 
 networks:
   catalog-network:
     driver: bridge
+
+
+
