@@ -1,4 +1,6 @@
-﻿namespace BasketService.Services.Interfaces
+﻿using BasketService.Models;
+
+namespace BasketService.Services.Interfaces
 {
     public interface IBasketService
     {

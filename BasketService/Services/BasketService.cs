@@ -1,6 +1,11 @@
 ﻿using BasketService.Data.Interfaces;
 using BasketService.Data.Models;
+using BasketService.Models;
 using BasketService.Services.Interfaces;
+using Microsoft.Extensions.Caching.Distributed;
+using System;
+using System.Linq;
+using System.Text.Json;
 
 namespace BasketService.Services
 {
@@ -8,16 +13,16 @@ namespace BasketService.Services
     {
         private readonly IBasketRepository _basketRepository;
         private readonly IBasketItemRepository _basketItemRepository;
-        private readonly IRedisCacheService _redisCacheService;
+        private readonly IDistributedCache _distributedCache;
 
         public BasketService(
             IBasketRepository basketRepository,
             IBasketItemRepository basketItemRepository,
-            IRedisCacheService redisCacheService)
+            IDistributedCache distributedCache)
         {
             _basketRepository = basketRepository;
             _basketItemRepository = basketItemRepository;
-            _redisCacheService = redisCacheService;
+            _distributedCache = distributedCache;
         }
 
         public void AddItemToBasket(int userId, int productId, int quantity)
@@ -44,9 +49,8 @@ namespace BasketService.Services
 
             _basketRepository.UpdateBasket(basket);
 
-            
-            _redisCacheService.Set($"Basket:{userId}", basket);
-
+            // Сохранение в кеш с использованием IDistributedCache
+            SetBasketToCache(userId, basket);
         }
 
         public void RemoveItemFromBasket(int userId, int productId)
@@ -63,32 +67,29 @@ namespace BasketService.Services
                 basket.BasketItems.Remove(basketItem);
                 _basketRepository.UpdateBasket(basket);
 
-   
-                _redisCacheService.Set($"Basket:{userId}", basket);
+                // Сохранение в кеш с использованием IDistributedCache
+                SetBasketToCache(userId, basket);
             }
-
         }
 
         public BasketResponse GetBasket(int userId)
         {
-      
-            var cachedBasket = _redisCacheService.Get<Basket>($"Basket:{userId}");
+            // Попытка получения корзины из кеша
+            var cachedBasket = GetBasketFromCache(userId);
+
             if (cachedBasket != null)
             {
-    
                 return MapToBasketResponse(cachedBasket);
             }
 
-       
+            // Если корзина не найдена в кеше, получаем из репозитория
             var basket = _basketRepository.GetBasketByUserId(userId);
 
             if (basket == null)
                 return new BasketResponse();
 
-         
-            _redisCacheService.Set($"Basket:{userId}", basket);
-
-          
+            // Сохранение в кеш с использованием IDistributedCache
+            SetBasketToCache(userId, basket);
 
             return MapToBasketResponse(basket);
         }
@@ -101,10 +102,8 @@ namespace BasketService.Services
             {
                 _basketRepository.DeleteBasket(basket.Id);
 
-        
-                _redisCacheService.Remove($"Basket:{userId}");
-
-            
+                // Удаление из кеша с использованием IDistributedCache
+                RemoveBasketFromCache(userId);
             }
         }
 
@@ -121,7 +120,33 @@ namespace BasketService.Services
                 }).ToList()
             };
         }
+
+        private void SetBasketToCache(int userId, Basket basket)
+        {
+            var options = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30) // Установите желаемое время истечения
+            };
+
+            var serializedBasket = JsonSerializer.Serialize(basket);
+            _distributedCache.SetString($"Basket:{userId}", serializedBasket, options);
+        }
+
+        private Basket GetBasketFromCache(int userId)
+        {
+            var cachedBasket = _distributedCache.GetString($"Basket:{userId}");
+
+            if (cachedBasket != null)
+            {
+                return JsonSerializer.Deserialize<Basket>(cachedBasket);
+            }
+
+            return null;
+        }
+
+        private void RemoveBasketFromCache(int userId)
+        {
+            _distributedCache.Remove($"Basket:{userId}");
+        }
     }
-
-
 }
