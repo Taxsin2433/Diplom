@@ -1,0 +1,45 @@
+﻿@model OrderDetailModel
+
+@{
+    ViewData["Title"] = "Order";
+}
+
+<h2>Order</h2>
+
+@if (Model != null && Model.OrderItems != null && Model.OrderItems.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Product Id
+                </th>
+                <th>
+                    Quantity
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>
+                        @item.ProductId
+                    </td>
+                    <td>
+                        @item.Quantity
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+else
+{
+    <p>No items in the order.</p>
+}
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
