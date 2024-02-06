@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CatalogService.Controllers
 {
     [ApiController]
-    [Route("bff/[controller]")]
+    [Route("api/[controller]")]
     public class BffController : ControllerBase
     {
         private readonly ICatalogService _catalogService;
