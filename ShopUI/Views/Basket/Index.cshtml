@@ -1,0 +1,63 @@
+﻿@model BasketRequestModel
+
+@{
+    ViewData["Title"] = "Basket";
+}
+
+<h2>Basket</h2>
+
+@if (Model != null && Model.BasketItems != null && Model.BasketItems.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Product Id
+                </th>
+                <th>
+                    Quantity
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.BasketItems)
+            {
+                <tr>
+                    <td>
+                        @item.ProductId
+                    </td>
+                    <td>
+                        @item.Quantity
+                    </td>
+                    <td>
+                        <a asp-action="RemoveItem" asp-route-userId="@Model.UserId" asp-route-productId="@item.ProductId">Remove</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div>
+        <!-- Форма для ввода адреса доставки и отправки заказа -->
+        <form asp-controller="Order" asp-action="PlaceOrder" method="post">
+            <label for="shippingAddress">Shipping Address:</label>
+            <input type="text" id="shippingAddress" name="shippingAddress" required>
+            <input type="hidden" name="userId" value="@Model.UserId">
+            @foreach (var item in Model.BasketItems)
+            {
+                <input type="hidden" name="basketItems[@item.ProductId].ProductId" value="@item.ProductId">
+                <input type="hidden" name="basketItems[@item.ProductId].Quantity" value="@item.Quantity">
+            }
+            <button type="submit">Checkout</button>
+        </form>
+    </div>
+}
+else
+{
+    <p>Your basket is empty.</p>
+}
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
