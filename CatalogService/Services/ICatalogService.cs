@@ -4,7 +4,7 @@ namespace CatalogService.Services
 {
     public interface ICatalogService
     {
-        IEnumerable<CatalogItemModel> GetAllCatalogItems();
+        IEnumerable<CatalogItemModel> GetCatalogItems(int page, int pageSize);
         CatalogItemDetailModel GetCatalogItemById(int id);
     }
 }

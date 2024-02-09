@@ -7,5 +7,6 @@ namespace OrderService.Services.Interfaces
     {
         void PlaceOrder(int userId, OrderRequestModel orderRequest);
         OrderDetailModel GetOrderDetails(int orderId);
+        IEnumerable<OrderListModel> GetOrdersByUserId(int userId);
     }
 }

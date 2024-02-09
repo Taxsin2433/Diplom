@@ -57,6 +57,31 @@ namespace OrderService.Controllers
                 _logger.LogError(ex, "Error getting order details for OrderId: {OrderId}", orderId);
                 return StatusCode(500, "Internal Server Error");
             }
+
         }
+        [HttpGet("get-orders/{userId}")]
+        public IActionResult GetOrdersByUserId(int userId)
+        {
+            try
+            {
+                _logger.LogInformation("Getting orders for user {UserId}", userId);
+
+                var orders = _orderService.GetOrdersByUserId(userId);
+
+                if (orders == null || !orders.Any())
+                {
+                    _logger.LogWarning("Orders not found for user {UserId}", userId);
+                    return NotFound("Orders not found");
+                }
+
+                return Ok(orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting orders for user {UserId}", userId);
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
     }
 }

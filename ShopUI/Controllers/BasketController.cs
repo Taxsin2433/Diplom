@@ -10,7 +10,7 @@ namespace ShopUI.Controllers
 
         public BasketController(IHttpClientFactory httpClientFactory)
         {
-            _apiClient = httpClientFactory.CreateClient("BasketApi  ");
+            _apiClient = httpClientFactory.CreateClient("BasketApi");
         }
 
         public async Task<IActionResult> Index()
@@ -21,9 +21,31 @@ namespace ShopUI.Controllers
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            var basketItems = JsonConvert.DeserializeObject<List<BasketItemModel>>(content);
+            var basketItems = JsonConvert.DeserializeObject<BasketRequestModel>(content);
 
             return View(basketItems);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddToBasket(int productId)
+        {
+            var userId = 1; // Замените на ваш способ получения идентификатора пользователя
+
+            var requestModel = new BasketItemRequestModel
+            {
+                UserId = userId,
+                ProductId = productId,
+                Quantity = 1
+            };
+
+            var jsonRequest = JsonConvert.SerializeObject(requestModel);
+            var httpContent = new StringContent(jsonRequest, System.Text.Encoding.UTF8, "application/json");
+
+            var response = await _apiClient.PostAsync("/api/bff/add-item", httpContent);
+            response.EnsureSuccessStatusCode();
+
+            TempData["SuccessMessage"] = "Товар добавлен в корзину!";
+            return RedirectToAction("Index");
         }
 
         [HttpPost]

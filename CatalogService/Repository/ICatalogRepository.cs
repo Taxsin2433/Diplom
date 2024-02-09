@@ -4,7 +4,7 @@ namespace CatalogService.Repository
 {
     public interface ICatalogRepository
     {
-        IEnumerable<CatalogItem> GetAllCatalogItems();
+        IEnumerable<CatalogItem> GetCatalogItems(int page, int pageSize);
         CatalogItem GetCatalogItemById(int id);
     }
 }

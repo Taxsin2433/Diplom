@@ -1,4 +1,7 @@
-﻿namespace BasketService.Data.Models
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
+
+namespace BasketService.Data.Models
 {
     public class BasketItem
     {
@@ -9,6 +12,7 @@
 
         public int BasketId { get; set; }
 
+        [JsonIgnore]
         public Basket Basket { get; set; }
     }
 }

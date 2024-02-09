@@ -12,9 +12,9 @@ namespace CatalogService.Repository
             _dbContext = dbContext;
         }
 
-        public IEnumerable<CatalogItem> GetAllCatalogItems()
+        public IEnumerable<CatalogItem> GetCatalogItems(int page, int pageSize)
         {
-            return _dbContext.CatalogItems.ToList();
+            return _dbContext.CatalogItems.Skip((page - 1) * pageSize).Take(pageSize).ToList();
         }
 
         public CatalogItem GetCatalogItemById(int id)

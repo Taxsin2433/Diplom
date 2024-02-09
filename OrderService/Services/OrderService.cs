@@ -1,5 +1,6 @@
 ﻿using OrderService.Data.Interfaces;
 using OrderService.Data.Models;
+using OrderService.Models;
 using OrderService.Services.Interfaces;
 using OrderService.ViewModels;
 
@@ -83,6 +84,24 @@ namespace OrderService.Services
             _logger.LogInformation("Order details retrieved successfully for OrderId: {OrderId}", orderId);
 
             return orderDetails;
+        }
+        public IEnumerable<OrderListModel> GetOrdersByUserId(int userId)
+        {
+            try
+            {
+                _logger.LogInformation("Getting orders for user {UserId}", userId);
+
+                var orders = _orderRepository.GetOrdersByUserId(userId);
+
+                _logger.LogInformation("Orders retrieved successfully for user {UserId}", userId);
+
+                return orders;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting orders for user {UserId}", userId);
+                throw;
+            }
         }
     }
 }

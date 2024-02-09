@@ -1,4 +1,5 @@
 ﻿using BasketService.Services.Interfaces;
+using BasketService.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BasketService.Controllers
@@ -15,9 +16,9 @@ namespace BasketService.Controllers
         }
 
         [HttpPost("add-item")]
-        public IActionResult AddItemToBasket(int userId, int productId, int quantity)
+        public IActionResult AddItemToBasket(BasketItemRequestModel requestModel)
         {
-            _basketService.AddItemToBasket(userId, productId, quantity);
+            _basketService.AddItemToBasket(requestModel.UserId, requestModel.ProductId, requestModel.Quantity);
             return Ok();
         }
 

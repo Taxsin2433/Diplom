@@ -13,41 +13,45 @@ namespace ShopUI.Controllers
             _apiClient = httpClientFactory.CreateClient("OrderApi");
         }
 
-        public async Task<IActionResult> Index(int orderId)
+        public async Task<IActionResult> Index(int userId)
         {
-            var response = await _apiClient.GetAsync($"/api/Bff/get-order/{orderId}");
+            var response = await _apiClient.GetAsync($"/api/Bff/get-orders/{userId}");
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
-            var order = JsonConvert.DeserializeObject<OrderModel>(content);
+            var order = JsonConvert.DeserializeObject<List<OrderListModel>>(content);
 
             return View(order);
         }
 
         [HttpPost]
-        public async Task<IActionResult> PlaceOrder(string shippingAddress)
+        public async Task<IActionResult> PlaceOrder(int userId, string shippingAddress, Dictionary<int, BasketItemRequest> basketItems)
         {
-            var userId = 1; // Замените на ваш способ получения идентификатора пользователя
-
-            var basketRequest = new BasketRequestModel
+            try
             {
-                UserId = userId,
-                BasketItems = new List<BasketItemRequest>() // Здесь добавьте товары из корзины пользователя
-            };
 
-            var orderRequest = new OrderRequestModel
+                var basketRequest = new BasketRequestModel
+                {
+                    UserId = userId,
+                    BasketItems = basketItems.Values.ToList()
+                };
+
+                var orderRequest = new OrderRequestModel
+                {
+                    Basket = basketRequest,
+                    ShippingAddress = shippingAddress
+                };
+
+                var response = await _apiClient.PostAsJsonAsync($"/api/Bff/place-order/{userId}", orderRequest);
+                response.EnsureSuccessStatusCode();
+
+                TempData["SuccessMessage"] = "Order placed successfully!";
+                return RedirectToAction("Index", new { userId });
+            }
+            catch (Exception ex)
             {
-                Basket = basketRequest,
-                ShippingAddress = shippingAddress
-            };
-
-            var response = await _apiClient.PostAsJsonAsync($"/api/Bff/place-order/{userId}", orderRequest);
-            response.EnsureSuccessStatusCode();
-
-            var orderId = JsonConvert.DeserializeObject<int>(await response.Content.ReadAsStringAsync());
-
-            TempData["SuccessMessage"] = "Заказ успешно размещен!";
-            return RedirectToAction("Index", new { orderId });
+                return StatusCode(500, "Internal Server Error");
+            }
         }
     }
 }

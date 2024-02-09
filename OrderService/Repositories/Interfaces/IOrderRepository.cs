@@ -9,5 +9,6 @@ namespace OrderService.Data.Interfaces
         void PlaceOrder(OrderDbModel order);
         OrderDbModel GetOrderById(int orderId);
         IEnumerable<OrderListModel> GetOrdersByUserId(int userId);
+       
     }
 }

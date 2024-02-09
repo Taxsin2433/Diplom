@@ -14,8 +14,8 @@ namespace CatalogService.Data
 
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
+   
                 modelBuilder.Entity<CatalogItem>().HasKey(ci => ci.Id);
-
 
                 base.OnModelCreating(modelBuilder);
             }

@@ -12,10 +12,9 @@ namespace CatalogService.Services
             _catalogRepository = catalogRepository;
         }
 
-        public IEnumerable<CatalogItemModel> GetAllCatalogItems()
+        public IEnumerable<CatalogItemModel> GetCatalogItems(int page, int pageSize)
         {
-
-            var catalogItems = _catalogRepository.GetAllCatalogItems();
+            var catalogItems = _catalogRepository.GetCatalogItems(page, pageSize);
 
             var catalogItemModels = new List<CatalogItemModel>();
             foreach (var catalogItem in catalogItems)
@@ -25,7 +24,6 @@ namespace CatalogService.Services
                     Id = catalogItem.Id,
                     Name = catalogItem.Name,
                     Price = catalogItem.Price
-          
                 });
             }
 

@@ -18,9 +18,9 @@ namespace CatalogService.Controllers
         }
 
         [HttpGet("items")]
-        public ActionResult<IEnumerable<CatalogItemModel>> GetCatalogItems()
+        public ActionResult<IEnumerable<CatalogItemModel>> GetCatalogItems(int page = 1, int pageSize = 10)
         {
-            var catalogItems = _catalogService.GetAllCatalogItems();
+            var catalogItems = _catalogService.GetCatalogItems(page, pageSize);
             return Ok(catalogItems);
         }
 
