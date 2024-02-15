@@ -25,7 +25,7 @@ namespace IdentityServer
                     {
                         new Scope("mvc")
                     },
-                },
+                },  
                 new ApiResource("catalog")
                 {
                     Scopes = new List<Scope>

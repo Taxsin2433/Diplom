@@ -1,42 +1,74 @@
 using CatalogService.Data;
 using CatalogService.Repository;
 using CatalogService.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using CatalogServiceService = CatalogService.Services.CatalogService;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Конфигурация Entity Framework
+// Configuration for Entity Framework
 builder.Services.AddDbContext<CatalogDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Добавление сервисов
+// Adding services
 builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
 builder.Services.AddScoped<ICatalogService, CatalogServiceService>();
 
 // Redis Configuration
-
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
     options.InstanceName = "CatalogServiceInstance";
 });
-
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer("Internal", options =>
+    {
+        options.Authority = builder.Configuration["JwtIssuerOptions:Authority"];
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false
+        };
+    })
+    .AddJwtBearer("Site", options =>
+    {
+        options.Authority = builder.Configuration["JwtIssuerOptions:Authority"];
+        options.Audience = builder.Configuration["JwtIssuerOptions:Audience"];
+        options.RequireHttpsMetadata = false;
+    });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AllowEndUser", policy =>
+    {
+        policy.AuthenticationSchemes.Add("Site");
+        policy.RequireClaim(JwtRegisteredClaimNames.Sub);
+    });
+    options.AddPolicy("AllowClient", policy =>
+    {
+        policy.AuthenticationSchemes.Add("Internal");
+        policy.Requirements.Add(new DenyAnonymousAuthorizationRequirement());
+    });
+});
+//// JWT Token OpenID Authentication
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//}).AddJwtBearer(options =>
+//{
+//    options.Authority = builder.Configuration["JwtIssuerOptions:Authority"];
+//    options.RequireHttpsMetadata = false;// Get authority from appsettings.json
+//    options.Audience = builder.Configuration["JwtIssuerOptions:Audience"]; // Get audience from appsettings.json
+//});
 
 var app = builder.Build();
 
@@ -70,10 +102,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+// Enable authentication
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

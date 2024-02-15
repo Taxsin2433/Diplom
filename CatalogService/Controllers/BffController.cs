@@ -1,5 +1,6 @@
 ﻿using CatalogService.Services;
 using CatalogService.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,7 @@ namespace CatalogService.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BffController : ControllerBase
     {
         private readonly ICatalogService _catalogService;
