@@ -1,0 +1,26 @@
+﻿@model CatalogIndex
+
+<h1>Catalog</h1>
+
+@if (Model != null && Model.CatalogItems.Any())
+{
+    @foreach (var item in Model.CatalogItems)
+    {
+        <div>
+            <h3>@item.Name</h3>
+            <p>Price: @item.Price</p>
+            <p>
+                <a asp-controller="Catalog" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <form asp-controller="Basket" asp-action="AddToBasket" method="post">
+                    <input type="hidden" name="productId" value="@item.Id" />
+                    <input type="submit" value="Add to Basket" />
+                </form>
+            </p>
+        </div>
+    }
+}
+else
+{
+    <p>No items available.</p>
+}
+
