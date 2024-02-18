@@ -50,7 +50,7 @@ builder.Services.AddAuthentication(options =>
         options.SignedOutRedirectUri = callBackUrl;
         options.ClientId = "mvc_pkce";
         options.ClientSecret = "secret";
-        options.ResponseType = "code";
+        options.ResponseType = "code id_token";
         options.SaveTokens = true;
         options.GetClaimsFromUserInfoEndpoint = true;
         options.RequireHttpsMetadata = false;
@@ -58,6 +58,9 @@ builder.Services.AddAuthentication(options =>
         options.Scope.Add("openid");
         options.Scope.Add("profile");
         options.Scope.Add("mvc");
+        options.Scope.Add("catalog");
+        options.Scope.Add("basket");
+        options.Scope.Add("order");
     });
 var app = builder.Build();
 

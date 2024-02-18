@@ -29,46 +29,40 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("RedisConnection");
     options.InstanceName = "CatalogServiceInstance";
 });
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer("Internal", options =>
-    {
-        options.Authority = builder.Configuration["JwtIssuerOptions:Authority"];
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateAudience = false
-        };
-    })
-    .AddJwtBearer("Site", options =>
-    {
-        options.Authority = builder.Configuration["JwtIssuerOptions:Authority"];
-        options.Audience = builder.Configuration["JwtIssuerOptions:Audience"];
-        options.RequireHttpsMetadata = false;
-    });
-builder.Services.AddAuthorization(options =>
+
+// JWT Token OpenID Authentication
+builder.Services.AddAuthentication(options =>
 {
-    options.AddPolicy("AllowEndUser", policy =>
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.Events = new JwtBearerEvents()
     {
-        policy.AuthenticationSchemes.Add("Site");
-        policy.RequireClaim(JwtRegisteredClaimNames.Sub);
-    });
-    options.AddPolicy("AllowClient", policy =>
-    {
-        policy.AuthenticationSchemes.Add("Internal");
-        policy.Requirements.Add(new DenyAnonymousAuthorizationRequirement());
-    });
+        OnMessageReceived = msg =>
+        {
+            var token = msg?.Request.Headers.Authorization.ToString();
+            string path = msg?.Request.Path ?? "";
+            if (!string.IsNullOrEmpty(token))
+
+            {
+                Console.WriteLine("Access token");
+                Console.WriteLine($"URL: {path}");
+                Console.WriteLine($"Token: {token}\r\n");
+            }
+            else
+            {
+                Console.WriteLine("Access token");
+                Console.WriteLine("URL: " + path);
+                Console.WriteLine("Token: No access token provided\r\n");
+            }
+            return Task.CompletedTask;
+        }
+    };
+    options.Authority = builder.Configuration["JwtIssuerOptions:Authority"];
+    options.RequireHttpsMetadata = false;// Get authority from appsettings.json
+    options.Audience = builder.Configuration["JwtIssuerOptions:Audience"]; // Get audience from appsettings.json
 });
-//// JWT Token OpenID Authentication
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//}).AddJwtBearer(options =>
-//{
-//    options.Authority = builder.Configuration["JwtIssuerOptions:Authority"];
-//    options.RequireHttpsMetadata = false;// Get authority from appsettings.json
-//    options.Audience = builder.Configuration["JwtIssuerOptions:Audience"]; // Get audience from appsettings.json
-//});
 
 var app = builder.Build();
 

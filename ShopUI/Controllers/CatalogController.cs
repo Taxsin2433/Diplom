@@ -25,20 +25,41 @@ public class CatalogController : Controller
         // Получение JWT токена из аутентификации
         var accessToken = await HttpContext.GetTokenAsync("access_token");
 
-        // Добавление JWT токена в заголовок Authorization
-        _apiClientCatalog.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        if (string.IsNullOrEmpty(accessToken))
+        {
+            // Редирект на страницу входа, если токен отсутствует
+            return RedirectToAction("Login", "Account");
+        }
 
-        var response = await _apiClientCatalog.GetAsync($"/api/Bff/catalogItems?page={page}&pageSize={pageSize}");
-        response.EnsureSuccessStatusCode();
+        // Создание экземпляра HttpClient
+        using (var httpClient = new HttpClient())
+        {
+            // Добавление JWT токена в заголовок Authorization
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        var content = await response.Content.ReadAsStringAsync();
-        var catalogItems = JsonConvert.DeserializeObject<List<CatalogItemModel>>(content);
+            // Выполнение HTTP-запроса к вашему API
+            var response = await httpClient.GetAsync($"http://localhost:5105/api/Bff/catalogItems?page={page}&pageSize={pageSize}");
 
-        return View(new CatalogIndex { CatalogItems = catalogItems });
+            // Проверка успешности выполнения запроса
+            if (response.IsSuccessStatusCode)
+            {
+                // Чтение ответа от API
+                var content = await response.Content.ReadAsStringAsync();
+                var catalogItems = JsonConvert.DeserializeObject<List<CatalogItemModel>>(content);
+
+                // Возврат представления с полученными данными
+                return View(new CatalogIndex { CatalogItems = catalogItems });
+            }
+            else
+            {
+                // В случае ошибки, обработка ошибки или вывод сообщения об ошибке
+                return View("Error");
+            }
+        }
     }
 
 
-    public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id)
     {
         // Получение JWT токена из аутентификации
         var accessToken = await HttpContext.GetTokenAsync("access_token");

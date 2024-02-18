@@ -19,7 +19,7 @@ namespace IdentityServer
         {
             return new ApiResource[]
             {
-                new ApiResource("alevelwebsite.com")
+                new ApiResource("mvc")
                 {
                     Scopes = new List<Scope>
                     {
@@ -64,10 +64,10 @@ namespace IdentityServer
                 {
                     ClientId = "mvc_pkce",
                     ClientName = "MVC PKCE Client",
-                    AllowedGrantTypes = GrantTypes.Code,
+                    AllowedGrantTypes = GrantTypes.Hybrid,
                     ClientSecrets = {new Secret("secret".Sha256())},
                     RedirectUris = { $"{configuration["MvcUrl"]}/signin-oidc"},
-                    AllowedScopes = {"openid", "profile", "mvc"},
+                    AllowedScopes = {"openid", "profile", "mvc", "catalog", "basket", "order"},
                     RequirePkce = true,
                     RequireConsent = false
                 },
